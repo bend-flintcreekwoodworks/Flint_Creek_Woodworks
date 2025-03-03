@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>CSV Viewer</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            let rowMap = new Map();
+            const barcodeInput = document.getElementById("barcodeInput");
+
+            // Store rows with full barcode format
+            document.querySelectorAll("tr[data-barcode]").forEach(row => {
+                const barcode = row.getAttribute("data-barcode").trim();
+                rowMap.set(barcode, row);
+            });
+
+            // Load previously scanned barcodes from localStorage
+            const scannedBarcodes = JSON.parse(localStorage.getItem("scannedBarcodes")) || [];
+            scannedBarcodes.forEach(barcode => {
+                const matchedRow = rowMap.get(barcode);
+                if (matchedRow) {
+                    matchedRow.style.backgroundColor = "lightgreen";
+                    matchedRow.classList.add("checked");
+                    matchedRow.querySelector(".status").innerText = "✔";
+                }
+            });
+
+            // Save total parts count to localStorage
+            const totalRows = document.querySelectorAll("tr[data-barcode]").length;
+            localStorage.setItem("totalParts", totalRows);
+
+            // Update summary on page load
+            updateSummary();
+
+            // Listen for barcode scanner input
+            barcodeInput.addEventListener("keydown", (event) => {
+                if (event.key === "Enter") {
+                    let barcode = barcodeInput.value.trim();
+                    barcodeInput.value = "";
+                    let matchedRow = rowMap.get(barcode);
+
+                    if (matchedRow && !matchedRow.classList.contains("checked")) {
+                        matchedRow.style.backgroundColor = "lightgreen";
+                        matchedRow.classList.add("checked");
+                        matchedRow.querySelector(".status").innerText = "✔";
+
+                        // Save scanned barcode to localStorage
+                        scannedBarcodes.push(barcode);
+                        localStorage.setItem("scannedBarcodes", JSON.stringify(scannedBarcodes));
+
+                        updateSummary();
+                        document.getElementById("errorMessage").style.display = "none";
+                    } else {
+                        document.getElementById("errorMessage").style.display = "block";
+                    }
+                }
+            });
+
+            // Reset button functionality
+            document.getElementById("resetButton").addEventListener("click", () => {
+                localStorage.removeItem("scannedBarcodes");
+                document.querySelectorAll("tr[data-barcode]").forEach(row => {
+                    row.style.backgroundColor = "";
+                    row.classList.remove("checked");
+                    row.querySelector(".status").innerText = "";
+                });
+                updateSummary();
+            });
+
+            // Export button functionality
+            document.getElementById("exportButton").addEventListener("click", () => {
+                const scannedRows = document.querySelectorAll("tr.checked");
+                const data = [];
+                data.push(["Part Name", "Width (inches)", "Length (inches)", "Cabinet Number"]);
+                scannedRows.forEach(row => {
+                    const cells = row.querySelectorAll("td");
+                    data.push([
+                        cells[0].innerText,
+                        cells[1].innerText,
+                        cells[2].innerText,
+                        cells[3].innerText
+                    ]);
+                });
+                const csvContent = data.map(row => row.join(",")).join("\n");
+                const blob = new Blob([csvContent], { type: "text/csv" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "scanned_data.csv";
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+
+            function updateSummary() {
+                const totalRows = document.querySelectorAll("tr[data-barcode]").length;
+                const scannedRows = document.querySelectorAll("tr.checked").length;
+                document.getElementById("totalScanned").innerText = scannedRows;
+                document.getElementById("totalRemaining").innerText = totalRows - scannedRows;
+            }
+        });
+    </script>
+    <style>
+        tr.checked {
+            background-color: lightgreen !important;
+            font-weight: bold;
+        }
+        #errorMessage {
+            color: red;
+            display: none;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            text-decoration: none;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Parts List</h1>
+    <input type="text" id="barcodeInput" placeholder="Scan barcode" autofocus>
+    <button id="resetButton">Reset Scanned Data</button>
+    <button id="exportButton">Export Scanned Data</button>
+    <div id="errorMessage">Barcode not found!</div>
+    <div id="summary">
+        <p>Total Scanned: <span id="totalScanned">0</span></p>
+        <p>Total Remaining: <span id="totalRemaining">0</span></p>
+    </div>
+    <table border="1">
+        <tr><th>Name</th><th>Width</th><th>Length</th><th>Cabinet</th><th>Status</th></tr>
+        {% for row in data %}
+        <tr data-barcode="{{ row['Part Name'] }},{{ row['Width (inches)'] }},{{ row['Length (inches)'] }},{{ row['Cabinet Number'] }}">
+            <td>{{ row['Part Name'] }}</td>
+            <td>{{ row['Width (inches)'] }}</td>
+            <td>{{ row['Length (inches)'] }}</td>
+            <td>{{ row['Cabinet Number'] }}</td>
+            <td class="status"></td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+    <a href="{{ url_for('index') }}" class="button">Back to Home</a>
+
+</body>
+</html>

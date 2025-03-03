@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Flint Creek Woodworks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .logo {
+            width: 200px;
+            margin-bottom: 20px;
+        }
+        .menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .button {
+            padding: 15px 30px;
+            font-size: 18px;
+            text-decoration: none;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="Company Logo">
+    <h1>Flint Creek Woodworks</h1>
+    <div class="menu">
+        <a href="{{ url_for('upload_file') }}" class="button">Upload XML File</a>
+        <a href="{{ url_for('checklist') }}" class="button">Start Scanning</a>
+        <a href="{{ url_for('progress') }}" class="button">View Progress</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Progress Report</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            let checkedBarcodes = new Set(JSON.parse(localStorage.getItem("scannedBarcodes")) || []);
+            let totalParts = parseInt(localStorage.getItem("totalParts")) || 0;
+            let checkedCount = checkedBarcodes.size;
+            let remaining = totalParts - checkedCount;
+            let progressPercent = totalParts > 0 ? (checkedCount / totalParts) * 100 : 0;
+
+            document.getElementById("checked-count").innerText = checkedCount;
+            document.getElementById("remaining-count").innerText = remaining;
+            document.getElementById("total-count").innerText = totalParts;
+            document.getElementById("progress-bar").style.width = progressPercent + "%";
+            document.getElementById("progress-text").innerText = Math.round(progressPercent) + "% Complete";
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .progress-container {
+            width: 80%;
+            background-color: #ddd;
+            border-radius: 25px;
+            margin: auto;
+            overflow: hidden;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .progress-bar {
+            height: 30px;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.5s;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            line-height: 30px;
+        }
+        .status-box {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            text-decoration: none;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Inventory Progress</h1>
+
+    <div class="status-box">
+        <p><strong>Total Parts:</strong> <span id="total-count">0</span></p>
+        <p><strong>Checked Items:</strong> <span id="checked-count">0</span></p>
+        <p><strong>Remaining:</strong> <span id="remaining-count">0</span></p>
+    </div>
+
+    <div class="progress-container">
+        <div id="progress-bar" class="progress-bar">
+            <span id="progress-text">0% Complete</span>
+        </div>
+    </div>
+
+    <br>
+    <a href="{{ url_for('index') }}" class="button">Back to Menu</a>
+
+</body>
+</html>
