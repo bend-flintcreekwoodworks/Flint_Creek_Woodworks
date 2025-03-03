@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <title>Progress Report</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">	
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             let checkedBarcodes = new Set(JSON.parse(localStorage.getItem("scannedBarcodes")) || []);
